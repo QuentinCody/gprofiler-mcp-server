@@ -6,6 +6,7 @@ const GPROFILER_BASE = "https://biit.cs.ut.ee/gprofiler/api";
 export interface GprofilerFetchOptions extends Omit<RestFetchOptions, "retryOn"> {
 	baseUrl?: string;
 	method?: string;
+	body?: unknown;
 }
 
 /**
@@ -23,8 +24,8 @@ export async function gprofilerFetch(
 
 	if (method === "POST" && opts?.body) {
 		// POST with JSON body — direct fetch for full control
-		const url = new URL(path, baseUrl);
-		return fetch(url.toString(), {
+		const url = `${baseUrl.replace(/\/$/, "")}${path.startsWith("/") ? "" : "/"}${path}`;
+		return fetch(url, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
