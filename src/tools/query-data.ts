@@ -6,7 +6,7 @@ interface QueryEnv {
 	GPROFILER_DATA_DO?: unknown;
 }
 
-export function registerQueryData(server: McpServer, env?: QueryEnv) {
+export function registerQueryData(server: McpServer, env?: QueryEnv): void {
 	const handler = createQueryDataHandler("GPROFILER_DATA_DO", "gprofiler");
 
 	server.registerTool(

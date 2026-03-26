@@ -6,7 +6,7 @@ interface SchemaEnv {
 	GPROFILER_DATA_DO?: unknown;
 }
 
-export function registerGetSchema(server: McpServer, env?: SchemaEnv) {
+export function registerGetSchema(server: McpServer, env?: SchemaEnv): void {
 	const handler = createGetSchemaHandler("GPROFILER_DATA_DO", "gprofiler");
 
 	server.registerTool(

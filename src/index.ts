@@ -13,7 +13,7 @@ interface GprofilerEnv {
 }
 
 export class MyMCP extends McpAgent {
-	server: any = new McpServer({
+	server = new McpServer({
 		name: "gprofiler",
 		version: "0.1.0",
 	});
