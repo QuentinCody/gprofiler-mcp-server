@@ -6,7 +6,7 @@ const GPROFILER_BASE = "https://biit.cs.ut.ee/gprofiler/api";
 export interface GprofilerFetchOptions extends Omit<RestFetchOptions, "retryOn"> {
 	baseUrl?: string;
 	method?: string;
-	body?: unknown;
+	body?: string | object;
 }
 
 /**
