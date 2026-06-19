@@ -23,6 +23,8 @@ export function registerCodeMode(
 
 	const executeTool = createExecuteTool({
 		prefix: "gprofiler",
+		// Verifiable provenance: gprofiler_execute results carry a _meta.citation.
+		source: { id: "gprofiler", name: "g:Profiler", url: "https://biit.cs.ut.ee/gprofiler" },
 		catalog: gprofilerCatalog,
 		apiFetch,
 		doNamespace: env.GPROFILER_DATA_DO,
