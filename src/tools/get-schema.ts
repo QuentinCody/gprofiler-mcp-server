@@ -1,6 +1,7 @@
 import type { McpServer } from "@bio-mcp/shared/mcp";
-import { z } from "zod";
 import { createGetSchemaHandler } from "@bio-mcp/shared/staging/utils";
+import { z } from "zod";
+import { gprofilerResponse } from "../lib/tool-result";
 
 interface SchemaEnv {
 	GPROFILER_DATA_DO?: unknown;
@@ -9,12 +10,12 @@ interface SchemaEnv {
 export function registerGetSchema(server: McpServer, env?: SchemaEnv): void {
 	const handler = createGetSchemaHandler("GPROFILER_DATA_DO", "gprofiler");
 
-	server.registerTool(
-		"gprofiler_get_schema",
+	for (const name of ["gprofiler_get_schema", "mcp_gprofiler_get_schema"]) server.registerTool(
+		name,
 		{
 			title: "Get Staged Data Schema",
 			description:
-				"Get schema information for staged g:Profiler data. Shows table structures and row counts. " +
+				"Get schema information for staged g:Profiler results. Shows table structures and row counts. " +
 				"If called without a data_access_id, lists all staged datasets available in this session.",
 			inputSchema: {
 				data_access_id: z.string().min(1).optional().describe(
@@ -24,11 +25,11 @@ export function registerGetSchema(server: McpServer, env?: SchemaEnv): void {
 		},
 		async (args, extra) => {
 			const runtimeEnv = env || (extra as { env?: SchemaEnv })?.env || {};
-			return handler(
+			return gprofilerResponse(() => handler(
 				args as Record<string, unknown>,
 				runtimeEnv as Record<string, unknown>,
 				(extra as Record<string, unknown>),
-			);
+			), runtimeEnv, name, extra, args);
 		},
 	);
 }

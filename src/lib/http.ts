@@ -1,47 +1,24 @@
-import { restFetch } from "@bio-mcp/shared/http/rest-fetch";
-import type { RestFetchOptions } from "@bio-mcp/shared/http/rest-fetch";
-
-const GPROFILER_BASE = "https://biit.cs.ut.ee/gprofiler/api";
-
-export interface GprofilerFetchOptions extends Omit<RestFetchOptions, "retryOn"> {
-	baseUrl?: string;
-	method?: string;
-	body?: string | object;
+export interface GprofilerFetchOptions {
+  baseUrl?: string;
+  method?: string;
+  body?: unknown;
+  signal?: AbortSignal;
 }
 
-/**
- * Fetch from the g:Profiler API.
- * All g:Profiler endpoints use POST with JSON body.
- * GET is supported as a fallback for query-param-based requests.
- */
 export async function gprofilerFetch(
-	path: string,
-	params?: Record<string, unknown>,
-	opts?: GprofilerFetchOptions,
+  path: string,
+  params?: Record<string, unknown>,
+  opts?: GprofilerFetchOptions,
 ): Promise<Response> {
-	const baseUrl = opts?.baseUrl ?? GPROFILER_BASE;
-	const method = opts?.method ?? "GET";
-
-	if (method === "POST" && opts?.body) {
-		// POST with JSON body — direct fetch for full control
-		const url = `${baseUrl.replace(/\/$/, "")}${path.startsWith("/") ? "" : "/"}${path}`;
-		return fetch(url, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-				Accept: "application/json",
-				"User-Agent": "gprofiler-mcp-server/1.0 (bio-mcp)",
-			},
-			body: JSON.stringify(opts.body),
-		});
-	}
-
-	return restFetch(baseUrl, path, params, {
-		...opts,
-		headers: { Accept: "application/json", ...(opts?.headers ?? {}) },
-		retryOn: [429, 500, 502, 503],
-		retries: opts?.retries ?? 3,
-		timeout: opts?.timeout ?? 30_000,
-		userAgent: "gprofiler-mcp-server/1.0 (bio-mcp)",
-	});
+  const url = new URL(`${opts?.baseUrl ?? "https://biit.cs.ut.ee/gprofiler/api"}${path}`);
+  for (const [key, value] of Object.entries(params ?? {})) {
+    if (value !== undefined) url.searchParams.set(key, String(value));
+  }
+  return fetch(url, {
+    method: opts?.method ?? "GET",
+    headers: { Accept: "application/json", "Content-Type": "application/json", "User-Agent": "gprofiler-mcp-server/1.0 (bio-mcp)" },
+    body: opts?.body === undefined ? undefined : JSON.stringify(opts.body),
+    signal: opts?.signal ?? AbortSignal.timeout(45_000),
+    redirect: "manual",
+  });
 }
